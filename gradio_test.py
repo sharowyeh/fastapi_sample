@@ -1,6 +1,8 @@
 import os
 import gradio as gr
 import numpy as np
+import ctypes
+from ctypes import c_uint32, c_char_p
 
 def combine(a, b):
     return a + " " + b
@@ -9,16 +11,29 @@ def combine(a, b):
 def mirror(x):
     return x
 
+nrf_ble_lib = ctypes.CDLL("./bin/nrf_ble_library.dll", ctypes.RTLD_LOCAL)
+nrf_ble_lib.dongle_init.argtypes = [c_char_p, c_uint32]
+nrf_ble_lib.dongle_init.restype = c_uint32
+
+def rundll():
+    result = 0
+    # try to call my dll
+    result = nrf_ble_lib.dongle_init(b"COM3", 10000)
+    print(f"call func {result}")
+    return result
 
 with gr.Blocks() as app:
-    with gr.Row():
+    testtxt = gr.Label()
+    testbtn = gr.Button(value="fire")
+    testbtn.click(rundll, outputs=[testtxt])
+    with gr.Column():
         txt = gr.Textbox(label="Input", value="Gradio makes me")
         txt_2 = gr.Textbox(label="Second", value="mind blowing")
     btn = gr.Button(value="Bind")
     txt_3 = gr.Textbox(value="", label="Output", lines=2)
     btn.click(combine, inputs=[txt, txt_2], outputs=[txt_3])
 
-    with gr.Row():
+    with gr.Column():
         im = gr.Image()
         im_2 = gr.Image()
 
