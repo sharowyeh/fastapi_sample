@@ -1,6 +1,9 @@
 # for my sensitive env settings
 .*.sh
 
+# gradio cache
+gradio_cached_examples
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
