@@ -1,8 +1,7 @@
 import os
 import gradio as gr
 import numpy as np
-import ctypes
-from ctypes import c_uint32, c_char_p
+from nrf_ble_lib_helper import dongle_init
 
 def combine(a, b):
     return a + " " + b
@@ -11,14 +10,10 @@ def combine(a, b):
 def mirror(x):
     return x
 
-nrf_ble_lib = ctypes.CDLL("./bin/nrf_ble_library.dll", ctypes.RTLD_LOCAL)
-nrf_ble_lib.dongle_init.argtypes = [c_char_p, c_uint32]
-nrf_ble_lib.dongle_init.restype = c_uint32
-
 def rundll():
     result = 0
     # try to call my dll
-    result = nrf_ble_lib.dongle_init(b"COM3", 10000)
+    result = dongle_init(b"COM3", 10000)
     print(f"call func {result}")
     return result
 

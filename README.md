@@ -1,7 +1,8 @@
 Small test and quick hands-on test to python packages
 
-- fastapi: lite weight restful service
-- gradio: quick front-end gui for ML componments usage
+- fastapi: lite weight restful service(current using version 0.95.2)
+
+- gradio: quick front-end gui for ML componments usage(current using version 3.32.0)
 
 # temp for twitch #
 

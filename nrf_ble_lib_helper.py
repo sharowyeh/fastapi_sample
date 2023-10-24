@@ -1,0 +1,39 @@
+import ctypes
+from ctypes import c_uint32, c_char_p, c_float, c_uint16, c_bool
+
+# NOTE: the nrf_ble_library is highly hardware dependent, that the
+#       helper class should be singleton design
+# TODO: so far just load dll once in python import but still better design a class with singleton
+
+# TODO: try catch here ensure dll load successfully, otherwise set instance to None prevent function calls
+nrf_ble_lib = ctypes.CDLL("./nrf_ble_library.dll", ctypes.RTLD_LOCAL)
+# EXTERNC NRFBLEAPI uint32_t dongle_init(char* serial_port, uint32_t baud_rate);
+nrf_ble_lib.dongle_init.argtypes = [c_char_p, c_uint32]
+nrf_ble_lib.dongle_init.restype = c_uint32
+# EXTERNC NRFBLEAPI uint32_t scan_start(float interval, float window, bool active, uint16_t timeout);
+nrf_ble_lib.scan_start.argtypes = [c_float, c_float, c_bool, c_uint16]
+nrf_ble_lib.scan_start.restype = c_uint32
+# EXTERNC NRFBLEAPI uint32_t scan_stop();
+nrf_ble_lib.scan_stop.argtypes = []
+nrf_ble_lib.scan_stop.restype = c_uint32
+
+print(f"ctypes load library {nrf_ble_lib}")
+
+def dongle_init():
+    """ returns: NRF_STAUTS, 0=NRF_SUCCESS """
+    # uint32_t to NRF_STATUS
+    result = 0
+    # call c export function
+    result = nrf_ble_lib.dongle_init(b"COM3", 10000)
+    print(f"call dongle init {result}")
+    return result
+
+def scan_start():
+    result = nrf_ble_lib.scan_start(200, 50, True, 0)
+    print(f"call scan start {result}")
+    return result
+
+def scan_stop():
+    result = nrf_ble_lib.scan_stop()
+    print(f"call scan stop {result}")
+    return result
