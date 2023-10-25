@@ -5,21 +5,22 @@ from pathlib import Path
 import requests
 import os
 from nrf_ble_lib_helper import dongle_init, scan_start, scan_stop
+from nrf_ble_lib_model import *
 
 app = FastAPI(title="Whatever🤔")
 
 # Test for Nordic BLE functions
 
-@app.get("/dongleinit", tags=["nordic"])
-async def nordic_dongleinit():
+@app.post("/dongleinit", tags=["nordic"])
+async def nordic_dongleinit(args: NrfBleInitArgs):
     """Init the BLE dongle"""
-    code = dongle_init()
+    code = dongle_init(args)
     return {"errorcode": code}
 
-@app.get("/scanstart", tags=["nordic"])
-async def nordic_scanstart():
+@app.post("/scanstart", tags=["nordic"])
+async def nordic_scanstart(args: NrfBleScanArgs):
     """Start BLE advertising"""
-    code = scan_start()
+    code = scan_start(args)
     return {"errorcode": code}
 
 @app.get("/scanstop", tags=["nordic"])
