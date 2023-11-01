@@ -1,13 +1,16 @@
-from fastapi import FastAPI, UploadFile, HTTPException
+from fastapi import FastAPI, UploadFile, HTTPException, Request, Form
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, HTMLResponse
 from pathlib import Path
 import requests
 import os
 from nrf_ble_lib_helper import dongle_init, scan_start, scan_stop
 from nrf_ble_lib_model import *
+from fastapi.templating import Jinja2Templates
 
 app = FastAPI(title="Whatever🤔")
+# for front end html templating
+templates = Jinja2Templates(directory="templates")
 
 # Test for Nordic BLE functions
 
@@ -68,11 +71,43 @@ async def download_file(file_name: str):
     return FileResponse(file_path, headers={"Content-Disposition": f"attachment; filename={file_name}"})
 
 # Hide root endpoint in swagger document
-@app.get("/", include_in_schema=False)
-def defult_root():
-    return {"message": "visit /docs to check APIs"}
+@app.get("/", include_in_schema=False, response_class=HTMLResponse)
+def defult_root(request: Request):
+    # reponse data for jinja2, struct refer to root.html
+    return templates.TemplateResponse(
+        "root.html", {
+            "request": request, 
+            "hello": False, 
+            "world": "foobar",
+            "search": "mandatory",
+            "default1": "",
+            "option1": ""
+        }
+    )
+
+@app.post("/", include_in_schema=False, response_class=HTMLResponse)
+async def post_input_form(
+    request: Request, 
+    search: str = Form(...), # mandatory value otherwise return error 422
+    default1: str = Form("default?"), # default value for form input given empty
+    option1: Optional[str] = Form("")): # cannot given python None, will be "None" to templating value 
+    
+    # reponse data for jinja2, struct refer to root.html
+    return templates.TemplateResponse(
+        "root.html", {
+            "request": request,
+            "hello": True, 
+            "world": "baz",
+            "search": search,
+            "default1": default1,
+            "option1": option1
+        }
+    )
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8765)
+    # use string type to assign this fastapi app for uvicorn reload changes automatically
+    uvicorn.run("fastapi_test:app", host="0.0.0.0", port=8765, reload=True)
+    # simply assign app object without reload or worker enabled
+    #uvicorn.run(app, host="0.0.0.0", port=8765)
 
